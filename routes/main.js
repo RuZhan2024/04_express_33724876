@@ -6,10 +6,27 @@ const path = require("path");
 
 const router = express.Router();
 
+/* ---------- Helpers for reverse-proxy prefixes ---------- */
+
+// Detect public prefix (e.g., "/usr/122/") behind a reverse proxy.
+// Priority: env PUBLIC_BASE_PATH > header X-Forwarded-Prefix > originalUrl - url.
+function getPrefix(req) {
+  let p =
+    process.env.PUBLIC_BASE_PATH ||
+    req.headers["x-forwarded-prefix"] ||
+    req.originalUrl.slice(0, req.originalUrl.length - req.url.length);
+
+  if (!p) p = "/";
+  // Normalize to have exactly one trailing slash
+  if (!p.endsWith("/")) p += "/";
+  // Root should stay "/"
+  if (p === "//") p = "/";
+  return p;
+}
+
 /* ---------- Shared layout helpers ---------- */
 
-// Build a site-wide nav (all links/actions are *relative*).
-// With <base href="..."> set in <head>, these resolve under the correct prefix.
+// Build site-wide nav (relative links; resolved via <base href="...">)
 function buildNav() {
   return `
   <nav
@@ -27,7 +44,7 @@ function buildNav() {
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
     "
   >
-    <!-- Left group: page links (all relative, resolved via <base>) -->
+    <!-- Left group: page links (relative paths) -->
     <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
       <a href="./"
          style="text-decoration:none;padding:.25rem .6rem;border:1px solid #e5e7eb;border-radius:.55rem;display:inline-block">
@@ -59,13 +76,12 @@ function buildNav() {
       </a>
     </div>
 
-    <!-- Right group: Welcome form (relative action) -->
+    <!-- Right group: Welcome form (relative action; resolved by <base>) -->
     <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
       <label for="welcome-name" style="color:#666;font-size:.95rem;margin-right:.1rem">
         <span>Welcome:</span>
       </label>
 
-      <!-- Relative action; resolved under <base href="..."> -->
       <form action="welcome" method="get" style="display:inline-flex;gap:.5rem;align-items:center">
         <input
           id="welcome-name"
@@ -101,11 +117,9 @@ function buildNav() {
 `;
 }
 
-// Minimal valid HTML wrapper with a shared nav and page title.
-// Crucial: inject <base href=".../"> so relative links work behind subpaths.
+// Minimal HTML wrapper with a shared nav and <base href="..."> for prefixing
 function renderPage(req, title, bodyHtml) {
-  const base = req.baseUrl || "/";             // where this router is mounted
-  const b = base.endsWith("/") ? base : base + "/";
+  const prefix = getPrefix(req); // e.g., "/usr/122/"
   const NAV = buildNav();
 
   return `<!doctype html>
@@ -114,7 +128,7 @@ function renderPage(req, title, bodyHtml) {
   <meta charset="utf-8">
   <title>${title}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <base href="${b}">
+  <base href="${prefix}">
   <style>
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; line-height:1.5; margin: 1.25rem; }
     nav a { text-decoration: none; padding: .25rem .5rem; border: 1px solid #ddd; border-radius: .5rem; }
@@ -173,14 +187,14 @@ router.get("/date", (req, res) => {
 
 // GET /welcome → if ?name= present, redirect to /welcome/:name; otherwise render form.
 router.get("/welcome", (req, res) => {
-  const base = (req.baseUrl || "").replace(/\/?$/, "/");
+  const prefix = getPrefix(req); // ensures /usr/122/ is included if present
   const name = (req.query.name || "").trim();
 
   if (!name) {
     return res.send(renderPage(req, "Welcome", `
       <h1>Welcome</h1>
       <p>Type your name to be greeted at <code>/welcome/:name</code>.</p>
-      <!-- Keep action relative; <base> ensures correct prefix -->
+      <!-- Relative action; <base href> ensures the right prefix -->
       <form action="welcome" method="get" style="display:flex;gap:.5rem;margin-top:.75rem">
         <input
           type="text"
@@ -197,8 +211,8 @@ router.get("/welcome", (req, res) => {
     `));
   }
 
-  // Use an absolute (prefixed) redirect so the Location header is correct everywhere
-  res.redirect(`${base}welcome/${encodeURIComponent(name)}`);
+  // Absolute, prefixed redirect → works behind /usr/122/
+  res.redirect(`${prefix}welcome/${encodeURIComponent(name)}`);
 });
 
 // GET /welcome/:name → parameterised route
@@ -212,10 +226,10 @@ router.get("/welcome/:name", (req, res) => {
 // GET /chain → two middleware functions with next()
 function stepStart(req, _res, next) {
   req.t0 = Date.now();
-  const min = 100, max = 500; // Random delay between 100–500 ms
+  const min = 100, max = 500; // random 100–500 ms
   const delayMs = Math.floor(Math.random() * (max - min + 1)) + min;
-  req.simulatedDelayMs = delayMs; // for display
-  setTimeout(next, delayMs);      // non-blocking delay
+  req.simulatedDelayMs = delayMs;
+  setTimeout(next, delayMs);
 }
 
 function stepFinish(req, res) {

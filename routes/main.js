@@ -208,15 +208,12 @@ router.get("/welcome/:name", (req, res) => {
 function stepStart(req, _res, next) {
   req.t0 = Date.now();
 
-  // allow overriding via query (?delay=350), otherwise random 100–500 ms
+  // Random delay between 100–500 ms (no query override)
   const min = 100, max = 500;
-  const delayMs =
-    Math.max(0, Number(req.query.delay || 0)) ||
-    (Math.floor(Math.random() * (max - min + 1)) + min);
+  const delayMs = Math.floor(Math.random() * (max - min + 1)) + min;
 
-  req.simulatedDelayMs = delayMs;
-
-  setTimeout(next, delayMs); // non-blocking delay
+  req.simulatedDelayMs = delayMs; // for display
+  setTimeout(next, delayMs);      // non-blocking delay
 }
 
 function stepFinish(req, res) {
@@ -235,6 +232,7 @@ function stepFinish(req, res) {
 
 // mount
 router.get("/chain", stepStart, stepFinish);
+
 
 
 // GET /file → serve a static html file via explicit route

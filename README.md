@@ -1,0 +1,94 @@
+# 04_express_33724876
+
+A very small Node.js web application. This is a simple personal demo built with **Express** that serves basic pages and demonstrates parameterised routes, chained middleware, and sending a static file. It shows how to organise routes with an Express `Router` and how to serve static assets safely. We will build on this structure in upcoming weeks.
+
+---
+
+## Technologies Used
+
+* **HTML** — for a static sample page (`public/a.html`)
+* **Node.js + Express** — to run a lightweight server (`index.js`, `routes/main.js`)
+* **Built-in Node module**
+
+  * `path` — to resolve file paths safely
+* **Express features**
+
+  * `express.Router()` — to organise routes
+  * `express.static()` — to serve static files from `public/` (plus explicit `/a.html` & `/file` routes)
+
+---
+
+## How to Install and Run Locally
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/RuZhan2024/04_express_33724876.git
+cd 04_express_33724876
+```
+
+### 2. Install Node.js (if not already installed)
+
+Download and install from [https://nodejs.org/](https://nodejs.org/)
+
+### 3. Install dependencies and run the server
+
+```bash
+npm install
+npm start
+```
+
+### 4. Open your browser
+
+Visit: **[http://localhost:8000](http://localhost:8000)** — You should see “Hello World!”.
+
+---
+
+## Available Routes
+
+* `/` — Hello World
+* `/about` — simple HTML page
+* `/contact` — sample contact details
+* `/date` — localised server date/time (en-GB, Europe/London)
+* `/welcome` — a small form that redirects to `/welcome/:name`
+* `/welcome/:name` — parameterised greeting
+* `/chain` — two handlers chained with `next()`; includes a **random 100–500 ms** simulated async delay
+* `/file` — sends `public/a.html`
+* `/a.html` — directly serves the same static file
+
+---
+
+## Project Structure
+
+```
+04_express_33724876/
+├── index.js
+├── package.json
+├── routes/
+│   └── main.js
+├── public/
+│   └── a.html
+├── .gitignore
+└── links.txt
+```
+
+---
+
+## Deploying on the VM (summary)
+
+```bash
+# on the VM
+git clone https://github.com/RuZhan2024/04_express_33724876.git
+cd 04_express_33724876
+npm install
+# optionally set your assigned port: export PORT=8000
+npm start
+```
+
+Keep it running:
+
+```bash
+sudo npm i -g forever
+forever start -a -l forever.log -o out.log -e err.log index.js
+```
+

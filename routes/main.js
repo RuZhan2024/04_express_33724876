@@ -105,7 +105,6 @@ const NAV = `
 `;
 
 
-
 // Minimal valid HTML wrapper with a shared nav and page title
 function renderPage(title, bodyHtml) {
   return `<!doctype html>
@@ -170,7 +169,33 @@ router.get("/date", (_req, res) => {
 
 /* ---------- Extension tasks (Part D) ---------- */
 
-// GET /welcome/:name  → parameterised route
+// FIXED: GET /welcome → redirect to /welcome/:name if ?name= is present,
+// otherwise show a small form page (works with the nav form and direct visits).
+router.get("/welcome", (req, res) => {
+  const name = (req.query.name || "").trim();
+  if (!name) {
+    return res.send(renderPage("Welcome", `
+      <h1>Welcome</h1>
+      <p>Type your name to be greeted at <code>/welcome/:name</code>.</p>
+      <form action="/welcome" method="get" style="display:flex;gap:.5rem;margin-top:.75rem">
+        <input
+          type="text"
+          name="name"
+          placeholder="Enter your name"
+          aria-label="name"
+          required
+          style="padding:.25rem .5rem;border:1px solid #ddd;border-radius:.5rem"
+        />
+        <button type="submit" style="padding:.25rem .6rem;border:1px solid #ddd;border-radius:.5rem;background:#f8f8f8">
+          Go
+        </button>
+      </form>
+    `));
+  }
+  res.redirect(`/welcome/${encodeURIComponent(name)}`);
+});
+
+// GET /welcome/:name → parameterised route
 router.get("/welcome/:name", (req, res) => {
   const { name } = req.params;
   res.send(renderPage("Welcome", `
@@ -178,7 +203,7 @@ router.get("/welcome/:name", (req, res) => {
   `));
 });
 
-// GET /chain  → two middleware functions with next()
+// GET /chain → two middleware functions with next()
 function stepStart(req, _res, next) {
   req.t0 = Date.now();
   next();
@@ -192,7 +217,7 @@ function stepFinish(req, res) {
 }
 router.get("/chain", stepStart, stepFinish);
 
-// GET /file  → serve a static html file (which also has the same nav below)
+// GET /file → serve a static html file via explicit route
 router.get("/file", (_req, res) => {
   const filePath = path.join(__dirname, "..", "public", "a.html");
   res.sendFile(filePath);
@@ -203,7 +228,6 @@ router.get("/a.html", (_req, res) => {
   const filePath = path.join(__dirname, "..", "public", "a.html");
   res.sendFile(filePath);
 });
-
 
 /* ---------- Export router ---------- */
 module.exports = router;

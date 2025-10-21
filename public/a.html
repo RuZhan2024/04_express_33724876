@@ -4,9 +4,111 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Sample A</title>
+    <style>
+      /* Page text defaults (keep consistent with server-rendered pages) */
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        line-height: 1.5;
+        margin: 1.25rem;
+      }
+      /* Hover style for links inside the nav (only visual sugar) */
+      nav a:hover { background: #f6f6f6; }
+    </style>
   </head>
   <body>
+
+    <!-- Inline-styled navigation (no classes) -->
+    <nav
+      style="
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:1rem;
+        flex-wrap:wrap;
+        margin-bottom:1rem;
+        padding:.5rem .75rem;
+        border:1px solid #e5e7eb;
+        border-radius:.55rem;
+        background:#fff;
+        font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      "
+    >
+      <!-- Left group: page links -->
+      <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+        <a href="/"
+           style="text-decoration:none;padding:.25rem .6rem;border:1px solid #e5e7eb;border-radius:.55rem;display:inline-block">
+           Home
+        </a>
+        <a href="/about"
+           style="text-decoration:none;padding:.25rem .6rem;border:1px solid #e5e7eb;border-radius:.55rem;display:inline-block">
+           About
+        </a>
+        <a href="/contact"
+           style="text-decoration:none;padding:.25rem .6rem;border:1px solid #e5e7eb;border-radius:.55rem;display:inline-block">
+           Contact
+        </a>
+        <a href="/date"
+           style="text-decoration:none;padding:.25rem .6rem;border:1px solid #e5e7eb;border-radius:.55rem;display:inline-block">
+           Date
+        </a>
+        <a href="/chain"
+           style="text-decoration:none;padding:.25rem .6rem;border:1px solid #e5e7eb;border-radius:.55rem;display:inline-block">
+           Chain
+        </a>
+        <a href="/file"
+           style="text-decoration:none;padding:.25rem .6rem;border:1px solid #e5e7eb;border-radius:.55rem;display:inline-block">
+           File
+        </a>
+        <a href="/a.html"
+           style="text-decoration:none;padding:.25rem .6rem;border:1px solid #e5e7eb;border-radius:.55rem;display:inline-block">
+           a.html
+        </a>
+      </div>
+
+      <!-- Right group: Welcome form (redirects to /welcome/:name) -->
+      <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+        <label for="welcome-name" style="color:#666;font-size:.95rem;margin-right:.1rem">
+          <span>Welcome:</span>
+        </label>
+        <!-- GET /welcome?name=... → server redirects to /welcome/:name -->
+        <form action="/welcome" method="get" style="display:inline-flex;gap:.5rem;align-items:center">
+          <input
+            id="welcome-name"
+            type="text"
+            name="name"
+            placeholder="Enter your name"
+            aria-label="name"
+            required
+            style="
+              padding:.35rem .55rem;
+              border:1px solid #e5e7eb;
+              border-radius:.55rem;
+              min-width:12ch;
+            "
+          />
+          <button
+            type="submit"
+            style="
+              padding:.35rem .7rem;
+              border:1px solid #e5e7eb;
+              border-radius:.55rem;
+              background:#f6f6f6;
+              cursor:pointer;
+            "
+            onmouseover="this.style.filter='brightness(0.98)';"
+            onmouseout="this.style.filter='';"
+          >
+            Go
+          </button>
+        </form>
+      </div>
+    </nav>
+
+    <!-- Page content -->
     <h1>Static File: a.html</h1>
-    <p>This file is served by Express either directly (/a.html) or via the /file route.</p>
+    <p>
+      This file is served by Express either directly (<code>/a.html</code>) or via the
+      <code>/file</code> route.
+    </p>
   </body>
 </html>

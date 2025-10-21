@@ -17,9 +17,7 @@ function getPrefix(req) {
     req.originalUrl.slice(0, req.originalUrl.length - req.url.length);
 
   if (!p) p = "/";
-  // Normalize to have exactly one trailing slash
   if (!p.endsWith("/")) p += "/";
-  // Root should stay "/"
   if (p === "//") p = "/";
   return p;
 }
@@ -187,7 +185,6 @@ router.get("/date", (req, res) => {
 
 // GET /welcome → if ?name= present, redirect to /welcome/:name; otherwise render form.
 router.get("/welcome", (req, res) => {
-  const prefix = getPrefix(req); // ensures /usr/122/ is included if present
   const name = (req.query.name || "").trim();
 
   if (!name) {
@@ -211,8 +208,9 @@ router.get("/welcome", (req, res) => {
     `));
   }
 
-  // Absolute, prefixed redirect → works behind /usr/122/
-  res.redirect(`${prefix}welcome/${encodeURIComponent(name)}`);
+  // KEY FIX: relative redirect to "<current path>/<name>"
+  // If current URL is /usr/122/welcome, this becomes /usr/122/welcome/<name>
+  res.redirect(encodeURIComponent(name));
 });
 
 // GET /welcome/:name → parameterised route

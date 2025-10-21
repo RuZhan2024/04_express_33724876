@@ -195,8 +195,7 @@ router.get("/welcome", (req, res) => {
 
   // KEY FIX: relative redirect to "<current path>/<name>"
   // If current URL is /usr/122/welcome, this becomes /usr/122/welcome/<name>
-  const prefix = getPrefix(req);
-    res.redirect(`${prefix}welcome/${encodeURIComponent(name)}`);
+    res.redirect(`welcome/${encodeURIComponent(name)}`);
 });
 
 // GET /welcome/:name → parameterised route

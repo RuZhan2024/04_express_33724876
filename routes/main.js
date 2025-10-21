@@ -68,7 +68,7 @@ function buildNav(base = "/") {
       </label>
 
       <!-- IMPORTANT: action uses base prefix so it works behind subpaths -->
-      <form action="${b}welcome" method="get" style="display:inline-flex;gap:.5rem;align-items:center">
+      <form action="welcome" method="get" style="display:inline-flex;gap:.5rem;align-items:center">
         <input
           id="welcome-name"
           type="text"

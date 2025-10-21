@@ -8,11 +8,12 @@ const router = express.Router();
 
 /* ---------- Shared layout helpers ---------- */
 
-// Inline-styled navigation:
-// - Left: quick page links
-// - Right: Welcome form redirects to /welcome/:name
-// - Uses flex + flex-wrap so it wraps nicely on narrow screens
-const NAV = `
+// Build a site-wide nav using a base path (works under reverse proxy subpaths)
+function buildNav(base = "/") {
+  // ensure trailing slash once
+  const b = base.endsWith("/") ? base : base + "/";
+
+  return `
   <nav
     style="
       display:flex;
@@ -30,31 +31,31 @@ const NAV = `
   >
     <!-- Left group: page links -->
     <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
-      <a href="/"
+      <a href="${b}"
          style="text-decoration:none;padding:.25rem .6rem;border:1px solid #e5e7eb;border-radius:.55rem;display:inline-block">
          Home
       </a>
-      <a href="/about"
+      <a href="${b}about"
          style="text-decoration:none;padding:.25rem .6rem;border:1px solid #e5e7eb;border-radius:.55rem;display:inline-block">
          About
       </a>
-      <a href="/contact"
+      <a href="${b}contact"
          style="text-decoration:none;padding:.25rem .6rem;border:1px solid #e5e7eb;border-radius:.55rem;display:inline-block">
          Contact
       </a>
-      <a href="/date"
+      <a href="${b}date"
          style="text-decoration:none;padding:.25rem .6rem;border:1px solid #e5e7eb;border-radius:.55rem;display:inline-block">
          Date
       </a>
-      <a href="/chain"
+      <a href="${b}chain"
          style="text-decoration:none;padding:.25rem .6rem;border:1px solid #e5e7eb;border-radius:.55rem;display:inline-block">
          Chain
       </a>
-      <a href="/file"
+      <a href="${b}file"
          style="text-decoration:none;padding:.25rem .6rem;border:1px solid #e5e7eb;border-radius:.55rem;display:inline-block">
          File
       </a>
-      <a href="/a.html"
+      <a href="${b}a.html"
          style="text-decoration:none;padding:.25rem .6rem;border:1px solid #e5e7eb;border-radius:.55rem;display:inline-block">
          a.html
       </a>
@@ -62,14 +63,12 @@ const NAV = `
 
     <!-- Right group: Welcome form (redirects to /welcome/:name) -->
     <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
-      <!-- Accessibility: explicit label for the input -->
       <label for="welcome-name" style="color:#666;font-size:.95rem;margin-right:.1rem">
         <span>Welcome:</span>
       </label>
 
-      <!-- GET /welcome?name=... → server redirects to /welcome/:name -->
-      <form action="/welcome" method="get" style="display:inline-flex;gap:.5rem;align-items:center">
-        <!-- Required input with placeholder and aria-label -->
+      <!-- IMPORTANT: action uses base prefix so it works behind subpaths -->
+      <form action="${b}welcome" method="get" style="display:inline-flex;gap:.5rem;align-items:center">
         <input
           id="welcome-name"
           type="text"
@@ -84,7 +83,6 @@ const NAV = `
             min-width:12ch;
           "
         />
-        <!-- Submit to trigger the redirect -->
         <button
           type="submit"
           style="
@@ -103,10 +101,13 @@ const NAV = `
     </div>
   </nav>
 `;
-
+}
 
 // Minimal valid HTML wrapper with a shared nav and page title
-function renderPage(title, bodyHtml) {
+function renderPage(req, title, bodyHtml) {
+  const base = req.baseUrl || "/"; // base path where this router is mounted
+  const NAV = buildNav(base);
+
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -129,24 +130,24 @@ function renderPage(title, bodyHtml) {
 /* ---------- Basic pages ---------- */
 
 // GET /
-router.get("/", (_req, res) => {
-  res.send(renderPage("Home", `
+router.get("/", (req, res) => {
+  res.send(renderPage(req, "Home", `
     <h1>Hello World!</h1>
     <p>This is the home page. Use the navigation links above.</p>
   `));
 });
 
 // GET /about
-router.get("/about", (_req, res) => {
-  res.send(renderPage("About", `
+router.get("/about", (req, res) => {
+  res.send(renderPage(req, "About", `
     <h1>This is the about page</h1>
     <p>Express Lab 4 demo.</p>
   `));
 });
 
 // GET /contact
-router.get("/contact", (_req, res) => {
-  res.send(renderPage("Contact", `
+router.get("/contact", (req, res) => {
+  res.send(renderPage(req, "Contact", `
     <h1>Contact</h1>
     <p>Student: Zhan Ru (ID: 33724876)</p>
     <p>Email: <a href="mailto:gru001@gold.ac.uk">gru001@gold.ac.uk</a></p>
@@ -154,14 +155,14 @@ router.get("/contact", (_req, res) => {
 });
 
 // GET /date
-router.get("/date", (_req, res) => {
+router.get("/date", (req, res) => {
   const formatted = new Intl.DateTimeFormat("en-GB", {
     weekday: "long", year: "numeric", month: "long", day: "numeric",
     hour: "2-digit", minute: "2-digit", second: "2-digit",
     hour12: false, timeZone: "Europe/London", timeZoneName: "short",
   }).format(new Date());
 
-  res.send(renderPage("Date", `
+  res.send(renderPage(req, "Date", `
     <h1>Current server date/time</h1>
     <p>${formatted}</p>
   `));
@@ -169,15 +170,15 @@ router.get("/date", (_req, res) => {
 
 /* ---------- Extension tasks (Part D) ---------- */
 
-// FIXED: GET /welcome → redirect to /welcome/:name if ?name= is present,
+// GET /welcome → redirect to /welcome/:name if ?name= is present,
 // otherwise show a small form page (works with the nav form and direct visits).
 router.get("/welcome", (req, res) => {
   const name = (req.query.name || "").trim();
   if (!name) {
-    return res.send(renderPage("Welcome", `
+    return res.send(renderPage(req, "Welcome", `
       <h1>Welcome</h1>
       <p>Type your name to be greeted at <code>/welcome/:name</code>.</p>
-      <form action="/welcome" method="get" style="display:flex;gap:.5rem;margin-top:.75rem">
+      <form action="${(req.baseUrl || "/").replace(/\/?$/, "/")}welcome" method="get" style="display:flex;gap:.5rem;margin-top:.75rem">
         <input
           type="text"
           name="name"
@@ -192,26 +193,22 @@ router.get("/welcome", (req, res) => {
       </form>
     `));
   }
-  res.redirect(`/welcome/${encodeURIComponent(name)}`);
+  res.redirect(`${(req.baseUrl || "").replace(/\/?$/, "/")}welcome/${encodeURIComponent(name)}`);
 });
 
 // GET /welcome/:name → parameterised route
 router.get("/welcome/:name", (req, res) => {
   const { name } = req.params;
-  res.send(renderPage("Welcome", `
+  res.send(renderPage(req, "Welcome", `
     <h1>Welcome, ${name}!</h1>
   `));
 });
 
 // GET /chain → two middleware functions with next()
-// stepStart: record start time and simulate async latency before next()
 function stepStart(req, _res, next) {
   req.t0 = Date.now();
-
-  // Random delay between 100–500 ms (no query override)
-  const min = 100, max = 500;
+  const min = 100, max = 500; // Random delay between 100–500 ms
   const delayMs = Math.floor(Math.random() * (max - min + 1)) + min;
-
   req.simulatedDelayMs = delayMs; // for display
   setTimeout(next, delayMs);      // non-blocking delay
 }
@@ -220,6 +217,7 @@ function stepFinish(req, res) {
   const elapsed = Date.now() - (req.t0 ?? Date.now());
   res.send(
     renderPage(
+      req,
       "Chain",
       `
       <h1>Chained route</h1>
@@ -229,20 +227,16 @@ function stepFinish(req, res) {
     )
   );
 }
-
-// mount
 router.get("/chain", stepStart, stepFinish);
 
-
-
 // GET /file → serve a static html file via explicit route
-router.get("/file", (_req, res) => {
+router.get("/file", (req, res) => {
   const filePath = path.join(__dirname, "..", "public", "a.html");
   res.sendFile(filePath);
 });
 
 // GET /a.html → explicitly serve the static file (no express.static required)
-router.get("/a.html", (_req, res) => {
+router.get("/a.html", (req, res) => {
   const filePath = path.join(__dirname, "..", "public", "a.html");
   res.sendFile(filePath);
 });

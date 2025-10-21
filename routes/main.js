@@ -189,28 +189,14 @@ router.get("/welcome", (req, res) => {
 
   if (!name) {
     return res.send(renderPage(req, "Welcome", `
-      <h1>Welcome</h1>
-      <p>Type your name to be greeted at <code>/welcome/:name</code>.</p>
-      <!-- Relative action; <base href> ensures the right prefix -->
-      <form action="welcome" method="get" style="display:flex;gap:.5rem;margin-top:.75rem">
-        <input
-          type="text"
-          name="name"
-          placeholder="Enter your name"
-          aria-label="name"
-          required
-          style="padding:.25rem .5rem;border:1px solid #ddd;border-radius:.5rem"
-        />
-        <button type="submit" style="padding:.25rem .6rem;border:1px solid #ddd;border-radius:.5rem;background:#f8f8f8">
-          Go
-        </button>
-      </form>
+      <h1>Welcome, my friend!</h1>
     `));
   }
 
   // KEY FIX: relative redirect to "<current path>/<name>"
   // If current URL is /usr/122/welcome, this becomes /usr/122/welcome/<name>
-  res.redirect(encodeURIComponent(name));
+  const prefix = getPrefix(req);
+    res.redirect(`${prefix}welcome/${encodeURIComponent(name)}`);
 });
 
 // GET /welcome/:name → parameterised route

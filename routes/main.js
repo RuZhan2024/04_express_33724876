@@ -68,7 +68,7 @@ function buildNav(base = "/") {
       </label>
 
       <!-- IMPORTANT: action uses base prefix so it works behind subpaths -->
-      <form action="welcome" method="get" style="display:inline-flex;gap:.5rem;align-items:center">
+      <form action="${b}welcome" method="get" style="display:inline-flex;gap:.5rem;align-items:center">
         <input
           id="welcome-name"
           type="text"
@@ -173,12 +173,14 @@ router.get("/date", (req, res) => {
 // GET /welcome → redirect to /welcome/:name if ?name= is present,
 // otherwise show a small form page (works with the nav form and direct visits).
 router.get("/welcome", (req, res) => {
+  const base = (req.baseUrl || "").replace(/\/?$/, "/");
   const name = (req.query.name || "").trim();
+
   if (!name) {
     return res.send(renderPage(req, "Welcome", `
       <h1>Welcome</h1>
       <p>Type your name to be greeted at <code>/welcome/:name</code>.</p>
-      <form action="welcome" method="get" style="display:flex;gap:.5rem;margin-top:.75rem">
+      <form action="${base}welcome" method="get" style="display:flex;gap:.5rem;margin-top:.75rem">
         <input
           type="text"
           name="name"
@@ -193,7 +195,8 @@ router.get("/welcome", (req, res) => {
       </form>
     `));
   }
-  res.redirect(`${(req.baseUrl || "").replace(/\/?$/, "/")}welcome/${encodeURIComponent(name)}`);
+
+  res.redirect(`${base}welcome/${encodeURIComponent(name)}`);
 });
 
 // GET /welcome/:name → parameterised route

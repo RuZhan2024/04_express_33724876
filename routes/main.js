@@ -204,18 +204,38 @@ router.get("/welcome/:name", (req, res) => {
 });
 
 // GET /chain → two middleware functions with next()
+// stepStart: record start time and simulate async latency before next()
 function stepStart(req, _res, next) {
   req.t0 = Date.now();
-  next();
+
+  // allow overriding via query (?delay=350), otherwise random 100–500 ms
+  const min = 100, max = 500;
+  const delayMs =
+    Math.max(0, Number(req.query.delay || 0)) ||
+    (Math.floor(Math.random() * (max - min + 1)) + min);
+
+  req.simulatedDelayMs = delayMs;
+
+  setTimeout(next, delayMs); // non-blocking delay
 }
+
 function stepFinish(req, res) {
-  const ms = Date.now() - (req.t0 ?? Date.now());
-  res.send(renderPage("Chain", `
-    <h1>Chained route</h1>
-    <p>Two handlers executed; ~${ms} ms elapsed.</p>
-  `));
+  const elapsed = Date.now() - (req.t0 ?? Date.now());
+  res.send(
+    renderPage(
+      "Chain",
+      `
+      <h1>Chained route</h1>
+      <p>Simulated delay: ~${req.simulatedDelayMs ?? 0} ms</p>
+      <p>Total elapsed (from stepStart → response): ~${elapsed} ms</p>
+    `
+    )
+  );
 }
+
+// mount
 router.get("/chain", stepStart, stepFinish);
+
 
 // GET /file → serve a static html file via explicit route
 router.get("/file", (_req, res) => {

@@ -178,7 +178,7 @@ router.get("/welcome", (req, res) => {
     return res.send(renderPage(req, "Welcome", `
       <h1>Welcome</h1>
       <p>Type your name to be greeted at <code>/welcome/:name</code>.</p>
-      <form action="${(req.baseUrl || "/").replace(/\/?$/, "/")}welcome" method="get" style="display:flex;gap:.5rem;margin-top:.75rem">
+      <form action="welcome" method="get" style="display:flex;gap:.5rem;margin-top:.75rem">
         <input
           type="text"
           name="name"

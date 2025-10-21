@@ -8,11 +8,9 @@ const router = express.Router();
 
 /* ---------- Shared layout helpers ---------- */
 
-// Build a site-wide nav using a base path (works under reverse proxy subpaths)
-function buildNav(base = "/") {
-  // ensure trailing slash once
-  const b = base.endsWith("/") ? base : base + "/";
-
+// Build a site-wide nav (all links/actions are *relative*).
+// With <base href="..."> set in <head>, these resolve under the correct prefix.
+function buildNav() {
   return `
   <nav
     style="
@@ -29,46 +27,46 @@ function buildNav(base = "/") {
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
     "
   >
-    <!-- Left group: page links -->
+    <!-- Left group: page links (all relative, resolved via <base>) -->
     <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
-      <a href="${b}"
+      <a href="./"
          style="text-decoration:none;padding:.25rem .6rem;border:1px solid #e5e7eb;border-radius:.55rem;display:inline-block">
          Home
       </a>
-      <a href="${b}about"
+      <a href="about"
          style="text-decoration:none;padding:.25rem .6rem;border:1px solid #e5e7eb;border-radius:.55rem;display:inline-block">
          About
       </a>
-      <a href="${b}contact"
+      <a href="contact"
          style="text-decoration:none;padding:.25rem .6rem;border:1px solid #e5e7eb;border-radius:.55rem;display:inline-block">
          Contact
       </a>
-      <a href="${b}date"
+      <a href="date"
          style="text-decoration:none;padding:.25rem .6rem;border:1px solid #e5e7eb;border-radius:.55rem;display:inline-block">
          Date
       </a>
-      <a href="${b}chain"
+      <a href="chain"
          style="text-decoration:none;padding:.25rem .6rem;border:1px solid #e5e7eb;border-radius:.55rem;display:inline-block">
          Chain
       </a>
-      <a href="${b}file"
+      <a href="file"
          style="text-decoration:none;padding:.25rem .6rem;border:1px solid #e5e7eb;border-radius:.55rem;display:inline-block">
          File
       </a>
-      <a href="${b}a.html"
+      <a href="a.html"
          style="text-decoration:none;padding:.25rem .6rem;border:1px solid #e5e7eb;border-radius:.55rem;display:inline-block">
          a.html
       </a>
     </div>
 
-    <!-- Right group: Welcome form (redirects to /welcome/:name) -->
+    <!-- Right group: Welcome form (relative action) -->
     <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
       <label for="welcome-name" style="color:#666;font-size:.95rem;margin-right:.1rem">
         <span>Welcome:</span>
       </label>
 
-      <!-- IMPORTANT: action uses base prefix so it works behind subpaths -->
-      <form action="${b}welcome" method="get" style="display:inline-flex;gap:.5rem;align-items:center">
+      <!-- Relative action; resolved under <base href="..."> -->
+      <form action="welcome" method="get" style="display:inline-flex;gap:.5rem;align-items:center">
         <input
           id="welcome-name"
           type="text"
@@ -103,10 +101,12 @@ function buildNav(base = "/") {
 `;
 }
 
-// Minimal valid HTML wrapper with a shared nav and page title
+// Minimal valid HTML wrapper with a shared nav and page title.
+// Crucial: inject <base href=".../"> so relative links work behind subpaths.
 function renderPage(req, title, bodyHtml) {
-  const base = req.baseUrl || "/"; // base path where this router is mounted
-  const NAV = buildNav(base);
+  const base = req.baseUrl || "/";             // where this router is mounted
+  const b = base.endsWith("/") ? base : base + "/";
+  const NAV = buildNav();
 
   return `<!doctype html>
 <html lang="en">
@@ -114,6 +114,7 @@ function renderPage(req, title, bodyHtml) {
   <meta charset="utf-8">
   <title>${title}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <base href="${b}">
   <style>
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; line-height:1.5; margin: 1.25rem; }
     nav a { text-decoration: none; padding: .25rem .5rem; border: 1px solid #ddd; border-radius: .5rem; }
@@ -170,8 +171,7 @@ router.get("/date", (req, res) => {
 
 /* ---------- Extension tasks (Part D) ---------- */
 
-// GET /welcome → redirect to /welcome/:name if ?name= is present,
-// otherwise show a small form page (works with the nav form and direct visits).
+// GET /welcome → if ?name= present, redirect to /welcome/:name; otherwise render form.
 router.get("/welcome", (req, res) => {
   const base = (req.baseUrl || "").replace(/\/?$/, "/");
   const name = (req.query.name || "").trim();
@@ -180,7 +180,8 @@ router.get("/welcome", (req, res) => {
     return res.send(renderPage(req, "Welcome", `
       <h1>Welcome</h1>
       <p>Type your name to be greeted at <code>/welcome/:name</code>.</p>
-      <form action="${base}welcome" method="get" style="display:flex;gap:.5rem;margin-top:.75rem">
+      <!-- Keep action relative; <base> ensures correct prefix -->
+      <form action="welcome" method="get" style="display:flex;gap:.5rem;margin-top:.75rem">
         <input
           type="text"
           name="name"
@@ -196,6 +197,7 @@ router.get("/welcome", (req, res) => {
     `));
   }
 
+  // Use an absolute (prefixed) redirect so the Location header is correct everywhere
   res.redirect(`${base}welcome/${encodeURIComponent(name)}`);
 });
 

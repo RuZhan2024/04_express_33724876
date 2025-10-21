@@ -93,16 +93,14 @@ forever start -a -l forever.log -o out.log -e err.log index.js
 ```
 
 
-## Live Links (VM)
-
-| Route            | Description                                                                                | Link                                                                                                                                                           |
-| ---------------- | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/`              | Hello World                                                                                | [http://www.doc.gold.ac.uk/usr/122/](http://www.doc.gold.ac.uk/usr/122/)                                                                                       |
-| `/about`         | simple HTML page                                                                           | [http://www.doc.gold.ac.uk/usr/122/about](http://www.doc.gold.ac.uk/usr/122/about)                                                                             |
-| `/contact`       | sample contact details                                                                     | [http://www.doc.gold.ac.uk/usr/122/contact](http://www.doc.gold.ac.uk/usr/122/contact)                                                                         |
-| `/date`          | localised server date/time (en-GB, Europe/London)                                          | [http://www.doc.gold.ac.uk/usr/122/date](http://www.doc.gold.ac.uk/usr/122/date)                                                                               |
-| `/welcome`       | simply shows “Welcome, my friend!”                                                         | [http://www.doc.gold.ac.uk/usr/122/welcome](http://www.doc.gold.ac.uk/usr/122/welcome)                                                                         |
-| `/welcome/:name` | parameterised greeting                                                                     | `http://www.doc.gold.ac.uk/usr/122/welcome/:name` (e.g., [http://www.doc.gold.ac.uk/usr/122/welcome/Ruzhan](http://www.doc.gold.ac.uk/usr/122/welcome/Ruzhan)) |
-| `/chain`         | two handlers chained with `next()`; includes a **random 100–500 ms** simulated async delay | [http://www.doc.gold.ac.uk/usr/122/chain](http://www.doc.gold.ac.uk/usr/122/chain)                                                                             |
-| `/file`          | sends `public/a.html`                                                                      | [http://www.doc.gold.ac.uk/usr/122/file](http://www.doc.gold.ac.uk/usr/122/file)                                                                               |
-| `/a.html`        | directly serves the same static file                                                       | [http://www.doc.gold.ac.uk/usr/122/a.html](http://www.doc.gold.ac.uk/usr/122/a.html)                                                                           |
+| Route            | Description                                                           | URL                                                                                                       |
+| ---------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `/`              | Hello World                                                           | [http://www.doc.gold.ac.uk/usr/122/](http://www.doc.gold.ac.uk/usr/122/)                                  |
+| `/about`         | simple HTML page                                                      | [http://www.doc.gold.ac.uk/usr/122/about](http://www.doc.gold.ac.uk/usr/122/about)                        |
+| `/contact`       | sample contact details                                                | [http://www.doc.gold.ac.uk/usr/122/contact](http://www.doc.gold.ac.uk/usr/122/contact)                    |
+| `/date`          | localised server date/time (en-GB, Europe/London)                     | [http://www.doc.gold.ac.uk/usr/122/date](http://www.doc.gold.ac.uk/usr/122/date)                          |
+| `/welcome`       | simply shows “Welcome, my friend!”                                    | [http://www.doc.gold.ac.uk/usr/122/welcome](http://www.doc.gold.ac.uk/usr/122/welcome)                    |
+| `/welcome/:name` | parameterised greeting                                                | e.g. [http://www.doc.gold.ac.uk/usr/122/welcome/Ruzhan](http://www.doc.gold.ac.uk/usr/122/welcome/Ruzhan) |
+| `/chain`         | two handlers chained with `next()`; random 100–500 ms simulated delay | [http://www.doc.gold.ac.uk/usr/122/chain](http://www.doc.gold.ac.uk/usr/122/chain)                        |
+| `/file`          | sends `public/a.html`                                                 | [http://www.doc.gold.ac.uk/usr/122/file](http://www.doc.gold.ac.uk/usr/122/file)                          |
+| `/a.html`        | directly serves the same static file                                  | [http://www.doc.gold.ac.uk/usr/122/a.html](http://www.doc.gold.ac.uk/usr/122/a.html)                      |

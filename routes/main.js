@@ -181,7 +181,7 @@ router.get("/date", (req, res) => {
   `));
 });
 
-/* ---------- Extension tasks (Part D) ---------- */
+/* ---------- Extension tasks (Part D) ------------ */
 
 // GET /welcome
 router.get("/welcome", (req, res) => {

@@ -183,7 +183,7 @@ router.get("/date", (req, res) => {
 
 /* ---------- Extension tasks (Part D) ---------- */
 
-// GET /welcome → if ?name= present, redirect to /welcome/:name; otherwise render form.
+// GET /welcome
 router.get("/welcome", (req, res) => {
   const name = (req.query.name || "").trim();
 
@@ -193,7 +193,6 @@ router.get("/welcome", (req, res) => {
     `));
   }
 
-  // KEY FIX: relative redirect to "<current path>/<name>"
   // If current URL is /usr/122/welcome, this becomes /usr/122/welcome/<name>
     res.redirect(`welcome/${encodeURIComponent(name)}`);
 });

@@ -1,12 +1,2 @@
-
-
 home=http://www.doc.gold.ac.uk/usr/122/
-about=http://www.doc.gold.ac.uk/usr/122/about
-contact=http://www.doc.gold.ac.uk/usr/122/contact
-date=http://www.doc.gold.ac.uk/usr/122/date
-welcome=http://www.doc.gold.ac.uk/usr/122/welcome
-welcome=http://www.doc.gold.ac.uk/usr/122/welcome/:name
-chain=http://www.doc.gold.ac.uk/usr/122/chain
-file=http://www.doc.gold.ac.uk/usr/122/file
-a.html=http://www.doc.gold.ac.uk/usr/122/a.html
 
